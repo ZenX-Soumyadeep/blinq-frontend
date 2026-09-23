@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MovieCarousel from './components/MovieCarousel';
+import CommunityPreview from './components/CommunityPreview';
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <Navbar />
       <Hero />
       <MovieCarousel />
+      <CommunityPreview />
     </div>
   );
 }
