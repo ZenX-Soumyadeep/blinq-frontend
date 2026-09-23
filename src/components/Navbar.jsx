@@ -1,37 +1,49 @@
 import { Search, Bell, User } from 'lucide-react';
 
-function Navbar() {
-    return (
-<nav className="flex items-center justify-between px-8 py-5 border-b border-white/10">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="bg-[#ff3b3b] text-white font-bold w-8 h-8 flex items-center justify-center rounded">
-            B
-          </div>
-          <span className="text-2xl font-bold tracking-tight">BlinQ</span>
-        </div>
+function Navbar({ currentUser, onLogout, onLoginClick }) {
+  return (
+    <nav className="flex justify-between items-center px-8 py-5 bg-gradient-to-b from-black/80 to-transparent absolute w-full z-30">
+      <div className="text-3xl font-black text-[#ff3b3b] tracking-tighter">BlinQ</div>
+      
+      <div className="hidden md:flex gap-8 font-semibold text-sm text-gray-300">
+        <a href="#" className="hover:text-white transition-colors">Home</a>
+        <a href="#" className="hover:text-white transition-colors">Movies</a>
+        <a href="#" className="hover:text-white transition-colors">Discussions</a>
+      </div>
 
-        {/* Center Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-          <a href="#" className="text-white hover:text-[#ff3b3b] transition-colors border-b-2 border-[#ff3b3b] pb-1">Home</a>
-          <a href="#" className="hover:text-white transition-colors pb-1">Movies</a>
-          <a href="#" className="hover:text-white transition-colors pb-1">Shows</a>
-          <a href="#" className="hover:text-white transition-colors pb-1">Community</a>
-          <a href="#" className="hover:text-white transition-colors pb-1">Watchlist</a>
-        </div>
-
-        {/* Right Icons */}
-        <div className="flex items-center gap-6 text-gray-300">
-          <button className="hover:text-white transition-colors"><Search size={20} /></button>
-          <button className="hover:text-white transition-colors"><Bell size={20} /></button>
-          <button className="hover:text-white transition-colors">
-            <div className="bg-gray-800 p-1.5 rounded-full border border-gray-600 hover:border-gray-400 transition-colors">
-              <User size={18} />
+      <div className="flex items-center gap-6 text-gray-300">
+        <Search size={20} className="cursor-pointer hover:text-white transition-colors" />
+        <Bell size={20} className="cursor-pointer hover:text-white transition-colors" />
+        
+        {/* Dynamic Auth Section */}
+        {currentUser ? (
+          <div className="flex items-center gap-4 border-l border-white/20 pl-6 ml-2">
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-bold text-white leading-tight">{currentUser.username}</span>
+              {currentUser.role === 'ROLE_ADMIN' && (
+                <span className="text-[10px] text-[#ff3b3b] font-bold uppercase tracking-wider">Admin</span>
+              )}
             </div>
-          </button>
-        </div>
-      </nav>
-    );
+            <button 
+              onClick={onLogout} 
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4 border-l border-white/20 pl-6 ml-2">
+            <button 
+              onClick={onLoginClick}
+              className="bg-[#ff3b3b] hover:bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
 }
 
 export default Navbar;

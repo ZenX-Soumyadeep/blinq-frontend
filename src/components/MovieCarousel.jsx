@@ -1,64 +1,66 @@
 import { useEffect, useState } from 'react';
+import ReviewModal from './ReviewModal';
 
-function MovieCarousel() {
+function MovieCarousel({ currentUser }) {
   const [movies, setMovies] = useState([]);
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   useEffect(() => {
-    const fetchTrendingMovies = async () => {
-      // Configure the request with your environment variable
-      const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}` 
-        }
-      };
-
+    const fetchMovies = async () => {
       try {
-        const response = await fetch('https://api.themoviedb.org/3/trending/movie/week', options);
+        const response = await fetch(
+          `https://api.themoviedb.org/3/trending/movie/week?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+        );
         const data = await response.json();
-        // TMDB returns 20 movies per page, let's grab the top 10 to keep the UI clean
-        setMovies(data.results.slice(0, 10)); 
+        
+        // Safety check: only set movies if results actually exist
+        if (data.results) {
+          setMovies(data.results);
+        } else {
+          console.error('TMDB API returned an error instead of movies:', data);
+          setMovies([]); // Fallback to an empty array so .map() doesn't crash
+        }
       } catch (err) {
         console.error('Failed to fetch movies:', err);
+        setMovies([]);
       }
     };
 
-    fetchTrendingMovies();
+    fetchMovies();
   }, []);
 
   return (
-    <section className="px-8 py-12 mt-10">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-white tracking-wide">Trending Now</h2>
-        <button className="text-sm text-gray-400 hover:text-[#ff3b3b] transition-colors">See All {'>'}</button>
-      </div>
+    <section className="px-8 py-10 relative">
+      <h2 className="text-2xl font-bold text-white mb-6 tracking-wide">Trending This Week</h2>
       
-      {/* Horizontal Scroll Container */}
-      <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
-        {movies.map((movie) => (
-          <div key={movie.id} className="min-w-[220px] shrink-0 group cursor-pointer flex flex-col gap-3">
-            <div className="overflow-hidden rounded-xl relative shadow-lg border border-white/5">
-              {/* TMDB base image URL + dynamic poster path */}
+      <div className="flex overflow-x-auto gap-6 pb-8 custom-scrollbar snap-x">
+        {movies?.map((movie) => (
+          <div 
+            key={movie.id} 
+            onClick={() => setSelectedMovie(movie)}
+            className="flex-none w-48 snap-start cursor-pointer group relative transition-transform hover:scale-105 duration-300"
+          >
+            <div className="rounded-xl overflow-hidden shadow-lg shadow-black/50 border border-white/5 group-hover:border-[#ff3b3b]/50 transition-colors">
               <img 
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
                 alt={movie.title}
-                className="w-full h-[330px] object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-72 object-cover"
               />
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <button className="bg-[#ff3b3b] text-white px-5 py-2 rounded-lg font-semibold scale-90 group-hover:scale-100 transition-transform">
-                  Details
-                </button>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                <p className="text-white font-semibold text-sm line-clamp-2">{movie.title}</p>
               </div>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-100 truncate text-base">{movie.title}</h3>
-              <p className="text-sm text-gray-500">{movie.release_date?.split('-')[0]}</p>
             </div>
           </div>
         ))}
       </div>
+
+      {selectedMovie && (
+        <ReviewModal 
+          movie={selectedMovie} 
+          onClose={() => setSelectedMovie(null)} 
+          currentUser={currentUser} 
+        />
+      )}
     </section>
   );
 }
